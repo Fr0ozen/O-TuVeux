@@ -1,0 +1,16 @@
+{
+    "name": "si-tu-veux",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "body-parser": "~1.18.3",
+        "express": "~4.16.4",
+        "express-list-endpoints": "~4.0.0",
+        "mssql": "~4.3.0",
+        "jsonwebtoken": "~8.4.0",
+        "fs-extra": "~7.0.1"
+    },
+    "devDependencies": {
+        "typescript": "~3.2.2"
+    }
+}
