@@ -13,21 +13,14 @@ function createToken(req, res) {
         if (username === mockedUsername && password === mockedPassword) {
             let token = jwt.sign({username: username}, privateKey, {algorithm: 'RS256', expiresIn: '2h'});
             return res.status(200).send({
-                success: true,
                 message: 'Authentication successful!',
                 token: token
             });
         } else {
-            return res.status(401).send({
-                success: false,
-                message: 'Incorrect username or password'
-            });
+            return res.status(403).send('Incorrect username or password');
         }
     } else {
-         return res.status(400).send({
-            success: false,
-            message: 'Authentication failed! Please check the request'
-        });
+         return res.status(400).send('Authentication failed! Please check the request');
     }
 }
 
@@ -38,19 +31,13 @@ function checkToken(req, res, next) {
     if (token) {
         jwt.verify(token, publicKey, (err, decoded) => {
             if (err) {
-                return res.status(401).send({
-                    success: err,
-                    message: 'Token is not valid'
-                });
+                return res.status(401).send('Token is not valid');
             } else {
                 next();
             }
         });
     } else {
-        return res.status(401).send({
-            success: false,
-            message: 'Auth token is not supplied'
-        });
+        return res.status(401).send('Auth token is not supplied');
     }
 }
 
