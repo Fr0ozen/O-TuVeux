@@ -12,7 +12,7 @@ function createPlayer(req, res) {
         database.executeMainQuery('INSERT INTO PLAYER(fname, lname, pseudo, level, origin, sex) VALUES (\'' + fname + '\', \'' + lname + '\', \'' + pseudo + '\', ' + level + ', \'' + origin + '\', ' + sex + ');').then(result => {
             if (parseInt(JSON.parse(JSON.stringify(result)).rowsAffected, 10) === 1) {
                 return res.status(200).send({
-                    message: 'L\'utilisateur a bien été créé',
+                    message: 'L\'utilisateur a bien été créé'
                 });
             } else {
                 return res.status(400).send('Une erreur est survenue');
@@ -25,6 +25,21 @@ function createPlayer(req, res) {
     }
 }
 
+function getAllPlayer(req, res) {
+    database.executeMainQuery('SELECT * FROM PLAYER;').then(result => {
+        if (result.recordset.length > 1) {
+            return res.status(200).send({
+                players: result.recordset
+            });
+        } else {
+            return res.status(400).send('Une erreur est survenue');
+        }
+    }).catch(err => {
+        return res.status(400).send('Une erreur est survenue: ' + err);
+    });
+}
+
 module.exports = {
-    createPlayer: createPlayer
+    createPlayer: createPlayer,
+    getAllPlayer: getAllPlayer
 };

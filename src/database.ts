@@ -22,6 +22,9 @@ function executeMainQuery(request) {
                 conn.close();
                 sql.close();
             });
+        }).catch(err => {
+            reject(err);
+            sql.close();
         });
     });
 }                      

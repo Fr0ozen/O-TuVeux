@@ -19,26 +19,9 @@ app.use(function (req, res, next) {
 
 app.post('/createToken', token.createToken);
 app.post('/createPlayer', token.checkOrganizerToken, player.createPlayer);
-app.post('/createUser', token.checkOrganizerToken, createUser);
-//app.get('/users', token.checkToken, users);
+app.post('/getAllPlayer', token.checkOrganizerToken, player.getAllPlayer);
 
 const server = app.listen(port, function () {
     console.log('Express server listening on port ' + port);
     console.log(all_routes(app));
 });
-
-/*function users(req, res) {
-    return res.json([{
-        id: 1,
-        username: 'toto',
-        password: 'toto',
-        firstname: 'toto',
-        lastname: 'toto',
-        token: 'toto'
-    }]);
-}
-*/
-function createUser(req, res) {
-    var data = req.body;
-    console.log("creation user");
-}
