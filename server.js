@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const all_routes = require('express-list-endpoints');
 const token = require('./src/token.ts');
 const player = require('./src/player.ts');
+const team = require('./src/team.ts');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -20,6 +21,7 @@ app.use(function (req, res, next) {
 app.post('/createToken', token.createToken);
 app.post('/createPlayer', token.checkOrganizerToken, player.createPlayer);
 app.post('/getAllPlayer', token.checkOrganizerToken, player.getAllPlayer);
+app.post('/createTeam', token.checkOrganizerToken, team.createTeam);
 
 const server = app.listen(port, function () {
     console.log('Express server listening on port ' + port);
