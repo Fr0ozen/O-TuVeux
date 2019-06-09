@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const jwt = require('jsonwebtoken');
-const { poolPromise } = require('./database.ts');
+const { poolPromiseToken } = require('./database.ts');
 
 async function createToken(req, res) {
     let privateKey = fs.readFileSync('./keys/private.key', 'utf8');
@@ -8,7 +8,7 @@ async function createToken(req, res) {
     let password = req.body.password;
 
     if (username && password) {
-        const pool = await poolPromise;
+        const pool = await poolPromiseToken;
         const result = await pool.request().query('SELECT id, username, lname, fname, nationality, age, isorganizer FROM [USER] WHERE username = \'' + username + '\' AND password = \'' + password + '\';').catch(err => {
             return res.status(400).send('Une erreur est survenue: ' + err);
         });
@@ -54,7 +54,7 @@ function checkOrganizerToken(req, res, next) {
             if (err) {
                 return res.status(401).send('Le token n\'est plus valide');
             } else {
-                const pool = await poolPromise;
+                const pool = await poolPromiseToken;
                 const result = await pool.request().query('SELECT isorganizer FROM [USER] WHERE id = ' + req.body.user.id + ';').catch(err => {
                     return res.status(400).send('Une erreur est survenue: ' + err);
                 });

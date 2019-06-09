@@ -1,4 +1,4 @@
-const { poolPromise } = require('./database.ts');
+const { poolPromiseTeam } = require('./database.ts');
 const player = require('./player.ts');
 
 async function createTeam(req, res) {
@@ -7,7 +7,7 @@ async function createTeam(req, res) {
     const players = req.body.team.playerList;
     
     if (name && origin) {
-        const pool = await poolPromise;
+        const pool = await poolPromiseTeam;
         await pool.request().query('INSERT INTO [TEAM](name, origin) VALUES (\'' + name + '\', \'' + origin + '\');').catch(err => {
             return res.status(400).send('Le nom de l\'équipe est déjà utilisé');
         }); 
@@ -42,7 +42,7 @@ async function createTeam(req, res) {
 
 async function getIdTeamByName(name) {
     if (name) {
-        const pool = await poolPromise;
+        const pool = await poolPromiseTeam;
         const result = await pool.request().query('SELECT id FROM [TEAM] WHERE name = \'' + name + '\';').catch(err => {
             return err;
         });

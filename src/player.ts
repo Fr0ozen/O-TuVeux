@@ -1,4 +1,4 @@
-const { poolPromise } = require('./database.ts');
+const { poolPromisePlayer } = require('./database.ts');
 
 async function createPlayer(req, res) {
     let fname = req.body.player.fname;
@@ -9,7 +9,7 @@ async function createPlayer(req, res) {
     let sex = req.body.player.sex;
     
     if (fname && lname && pseudo && typeof level !== undefined && origin && typeof sex !== undefined) {
-        const pool = await poolPromise;
+        const pool = await poolPromisePlayer;
         await pool.request().query('INSERT INTO [PLAYER](fname, lname, pseudo, level, origin, sex) VALUES (\'' + fname + '\', \'' + lname + '\', \'' + pseudo + '\', ' + level + ', \'' + origin + '\', ' + sex + ');').catch(err => {
             return res.status(400).send('Une erreur est survenue: ' + err);
         });
@@ -23,7 +23,7 @@ async function createPlayer(req, res) {
 }
 
 async function getAllPlayer(req, res) {
-    const pool = await poolPromise;
+    const pool = await poolPromisePlayer;
     const result = await pool.request().query('SELECT * FROM [PLAYER];').catch(err => {
         return res.status(400).send('Une erreur est survenue: ' + err);
     });
@@ -35,7 +35,7 @@ async function getAllPlayer(req, res) {
 
 async function getIdPlayerByPseudo(pseudo) {
     if (pseudo) {
-        const pool = await poolPromise;
+        const pool = await poolPromisePlayer;
         const result = await pool.request().query('SELECT id FROM [PLAYER] WHERE pseudo = \'' + pseudo + '\';').catch(err => {
             return err;
         });
