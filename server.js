@@ -9,6 +9,7 @@ const all_routes = require('express-list-endpoints');
 const token = require('./src/token.ts');
 const player = require('./src/player.ts');
 const team = require('./src/team.ts');
+const round = require('./src/round.ts');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -29,11 +30,17 @@ app.post('/createPlayer', token.checkOrganizerToken, player.createPlayer);
 app.post('/getAllPlayer', token.checkOrganizerToken, player.getAllPlayer);
 app.post('/createTeam', token.checkOrganizerToken, team.createTeam);
 app.post("/update", function(req, res) {
+    round.addRound(req, res);
     pusher.trigger("events-channel", "new-like", {
         teamNumber: `${req.body.teamNumber}`,
-        teamScore: `${req.body.teamScore}`
+        rounds: `${req.body.rounds}`,
+        teamScore: `${req.body.teamScore}`,
+        idwinningteam: `${req.body.idwinningteam}`
         // likes : `${req.body.likes}`
     });
+});
+app.post('/getAllRoundsMatch', function(req, res){
+    round.getCurrentRounds(req, res);
 });
 
 const server = app.listen(port, function () {
