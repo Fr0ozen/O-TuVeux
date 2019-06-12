@@ -33,7 +33,7 @@ app.post('/getAllTeam', token.checkOrganizerToken, team.getAllTeam);
 app.post('/createArena', token.checkOrganizerToken, arena.createArena);
 app.post('/getAllArena', token.checkOrganizerToken, arena.getAllArena);
 app.post('/createTournament', token.checkOrganizerToken, tournament.createTournament);
-app.post("/update", token.checkOrganizerToken, round.addRound);
+app.post('/update', token.checkOrganizerToken, round.addRound);
 app.post('/getAllRoundsMatch', token.checkOrganizerToken, round.getCurrentRounds);
 
 const server = app.listen(port, function () {
