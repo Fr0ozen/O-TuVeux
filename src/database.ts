@@ -3,11 +3,11 @@ const propertiesReader = require('properties-reader');
 const properties = propertiesReader('properties.ini');
 
 const config = {
-    user: properties.get('maindatabase.username'),
-    password: properties.get('maindatabase.password'),
-    server: properties.get('maindatabase.server'),
-    port: properties.get('maindatabase.port'),
-    database: properties.get('maindatabase.database')
+    user: properties.get('database.username'),
+    password: properties.get('database.password'),
+    server: properties.get('database.server'),
+    port: properties.get('database.port'),
+    database: properties.get('database.databasename')
 }
 
 const poolPromise = new sql.ConnectionPool(config).connect().then(pool => {

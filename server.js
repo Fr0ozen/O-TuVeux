@@ -1,8 +1,6 @@
 require("dotenv").config();
 
 const cors = require("cors");
-const Pusher = require("pusher");
-
 const express = require('express');
 const bodyParser = require('body-parser')
 const all_routes = require('express-list-endpoints');
@@ -35,29 +33,10 @@ app.post('/getAllTeam', token.checkOrganizerToken, team.getAllTeam);
 app.post('/createArena', token.checkOrganizerToken, arena.createArena);
 app.post('/getAllArena', token.checkOrganizerToken, arena.getAllArena);
 app.post('/createTournament', token.checkOrganizerToken, tournament.createTournament);
-
-app.post("/update", function(req, res) {
-    round.addRound(req, res);
-    pusher.trigger("events-channel", "new-like", {
-        teamNumber: `${req.body.teamNumber}`,
-        rounds: `${req.body.rounds}`,
-        teamScore: `${req.body.teamScore}`,
-        idwinningteam: `${req.body.idwinningteam}`
-    });
-});
-app.post('/getAllRoundsMatch', function(req, res){
-    round.getCurrentRounds(req, res);
-});
+app.post("/update", token.checkOrganizerToken, round.addRound);
+app.post('/getAllRoundsMatch', token.checkOrganizerToken, round.getCurrentRounds);
 
 const server = app.listen(port, function () {
     console.log('Express server listening on port ' + port);
     console.log(all_routes(app));
-});
-
-const pusher = new Pusher({
-    appId: `${process.env.PUSHER_APP_ID}`,
-    key: `${process.env.PUSHER_API_KEY}`,
-    secret: `${process.env.PUSHER_API_SECRET}`,
-    cluster: `${process.env.PUSHER_APP_CLUSTER}`,
-    encrypted: true
 });

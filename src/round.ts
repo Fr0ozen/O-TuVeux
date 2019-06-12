@@ -1,5 +1,16 @@
 const { poolPromise } = require('./database.ts');
-//
+const propertiesReader = require('properties-reader');
+const properties = propertiesReader('properties.ini');
+const Pusher = require("pusher");
+
+const pusher = new Pusher({
+    appId: properties.get('pusher.id'),
+    key: properties.get('pusher.key'),
+    secret: properties.get('pusher.secret'),
+    cluster: properties.get('pusher.cluster'),
+    useTLS: true
+});
+
 async function addRound(req, res) {
     const round = req.body.rounds[0];
     const round2 = req.body.rounds[1];
@@ -22,30 +33,36 @@ async function addRound(req, res) {
 
     if(idmatch && idteam && roundnumber && typeof startingtime !== undefined && endingtime && typeof isct !== undefined && typeof iswinner !== undefined) {
         const pool = await poolPromise;
-        let query = 'INSERT INTO [ROUND](idmatch,idteam,roundnumber,startingtime,endingtime,isct,iswinner) VALUES (\'' +idmatch + '\', \'' +idteam + '\', \'' +roundnumber + '\', \'' +startingtime + '\', \'' +endingtime + '\', \'' +isct + '\', \'' +iswinner + '\');';
-        query = query + 'INSERT INTO [ROUND](idmatch,idteam,roundnumber,startingtime,endingtime,isct,iswinner) VALUES (\'' +idmatch2 + '\', \'' +idteam2 + '\', \'' +roundnumber2 + '\', \'' +startingtime2 + '\', \'' +endingtime2 + '\', \'' +isct2 + '\', \'' +iswinner2 + '\');';
-        console.log(query);
-        await pool.request().query(query)
-            .catch(err => {
+        let query = 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch + '\', \'' + idteam + '\', \'' + roundnumber + '\', \'' + startingtime + '\', \'' + endingtime + '\', \'' + isct + '\', \'' + iswinner + '\');';
+        query = query + 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch2 + '\', \'' + idteam2 + '\', \'' + roundnumber2 + '\', \'' + startingtime2 + '\', \'' + endingtime2 + '\', \'' + isct2 + '\', \'' + iswinner2 + '\');';
+        
+        await pool.request().query(query).catch(err => {
             return res.status(400).send('Une erreur est survenue: ' + err);
         });
         
+        pusher.trigger("events-channel", "new-like", {
+            teamNumber: req.body.teamNumber,
+            rounds: req.body.rounds,
+            teamScore: req.body.teamScore,
+            idwinningteam: req.body.idwinningteam
+        });
+        
         return res.status(200).send({
-            message: '',
+            message: 'Récupartion de l\'équipe gagnante',
             idwinningteam: req.body.idwinningteam
         });
     } else {
-            return res.status(400).send('Paramètre manquant');
+        return res.status(400).send('Paramètre manquant');
     }
 }
 
 async function getCurrentRounds(req, res){
     let idmatch = req.body.idmatch;
     const pool = await poolPromise;
-    let query = 'SELECT * FROM [ROUND] WHERE idmatch = \'' +idmatch+'\';'; 
-    const result = await pool.request().query(query)
-        .catch(err => {
-            return res.status(400).send('Une erreur est survenue: ' + err);
+    let query = 'SELECT * FROM [ROUND] WHERE idmatch = \'' + idmatch + '\';'; 
+    
+    const result = await pool.request().query(query).catch(err => {
+        return res.status(400).send('Une erreur est survenue: ' + err);
     });
         
     return res.status(200).send({
