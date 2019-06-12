@@ -40,6 +40,18 @@ async function createTeam(req, res) {
     }
 }
 
+async function getAllTeam(req, res) {
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT * FROM [TEAM];').catch(err => {
+        return res.status(400).send('Une erreur est survenue: ' + err);
+    });
+    
+    return res.status(200).send({
+        teams: result.recordset
+    });
+}
+
+
 async function getIdTeamByName(name) {
     if (name) {
         const pool = await poolPromise;
@@ -54,5 +66,6 @@ async function getIdTeamByName(name) {
 }
 
 module.exports = {
-    createTeam: createTeam
+    createTeam: createTeam,
+    getAllTeam: getAllTeam
 };
