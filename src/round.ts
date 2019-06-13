@@ -35,7 +35,7 @@ async function addRound(req, res) {
         const pool = await poolPromise;
         let query = 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch + '\', \'' + idteam + '\', \'' + roundnumber + '\', \'' + startingtime + '\', \'' + endingtime + '\', \'' + isct + '\', \'' + iswinner + '\');';
         query = query + 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch2 + '\', \'' + idteam2 + '\', \'' + roundnumber2 + '\', \'' + startingtime2 + '\', \'' + endingtime2 + '\', \'' + isct2 + '\', \'' + iswinner2 + '\');';
-        
+
         await pool.request().query(query).catch(err => {
             return res.status(400).send('Une erreur est survenue: ' + err);
         });
@@ -56,10 +56,10 @@ async function addRound(req, res) {
     }
 }
 
-async function getCurrentRounds(req, res){
+async function getAllRoundsMatch(req, res){
     let idmatch = req.body.idmatch;
     const pool = await poolPromise;
-    let query = 'SELECT * FROM [ROUND] WHERE idmatch = \'' + idmatch + '\';'; 
+    let query = 'SELECT [MATCH].id, [ROUND].idteam, ISNULL(SUM(IIF(iswinner = 1, 1, 0)), 0) as scoreTeam FROM [MATCH] LEFT JOIN [ROUND] ON [ROUND].idmatch = [MATCH].id WHERE [MATCH].id = \'' + idmatch + '\' GROUP BY [MATCH].id, [ROUND].idteam;'; 
     
     const result = await pool.request().query(query).catch(err => {
         return res.status(400).send('Une erreur est survenue: ' + err);
@@ -73,5 +73,5 @@ async function getCurrentRounds(req, res){
 
 module.exports = {
     addRound: addRound,
-    getCurrentRounds: getCurrentRounds
+    getAllRoundsMatch: getAllRoundsMatch
 };

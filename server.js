@@ -11,6 +11,7 @@ const arena = require('./src/arena.ts');
 const tournament = require('./src/tournament.ts');
 const round = require('./src/round.ts');
 const user = require('./src/user.ts');
+const match = require('./src/match.ts');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -34,8 +35,9 @@ app.post('/getAllTeam', token.checkOrganizerToken, team.getAllTeam);
 app.post('/createArena', token.checkOrganizerToken, arena.createArena);
 app.post('/getAllArena', token.checkOrganizerToken, arena.getAllArena);
 app.post('/createTournament', token.checkOrganizerToken, tournament.createTournament);
-app.post('/update', token.checkOrganizerToken, round.addRound);
-app.post('/getAllRoundsMatch', token.checkOrganizerToken, round.getCurrentRounds);
+app.post('/addRound', token.checkOrganizerToken, round.addRound);
+app.post('/getAllRoundsMatch', round.getAllRoundsMatch);
+app.post('/getLiveMatches', match.getLiveMatches);
 app.post('/getAllUser', token.checkOrganizerToken, user.getAllUser);
 
 const server = app.listen(port, function () {
