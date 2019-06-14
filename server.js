@@ -39,6 +39,9 @@ app.post('/addRound', token.checkOrganizerToken, round.addRound);
 app.post('/getAllRoundsMatch', round.getAllRoundsMatch);
 app.post('/getLiveMatches', match.getLiveMatches);
 app.post('/getAllUser', token.checkOrganizerToken, user.getAllUser);
+app.post('/getBracketByTournament', tournament.getBracketByTournament);
+
+app.get('/getAllTournament', tournament.getAllTournament);
 
 const server = app.listen(port, function () {
     console.log('Express server listening on port ' + port);
