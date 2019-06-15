@@ -59,8 +59,8 @@ async function createTournament(req, res) {
     }
 }
 
-async function getBracketByTournament(req, res) {
-    const tournamentId = req.body.tournament.id;
+async function getBracketByTournamentId(req, res) {
+    const tournamentId = req.body.id;
     
     if (tournamentId) {
         const pool = await poolPromise;
@@ -146,19 +146,17 @@ async function getBracketByTournament(req, res) {
     }
 }
 
-async function getAllTournament(req, res) {
+async function getAllTournamentForGrid(req, res) {
     const pool = await poolPromise;
-    const result = await pool.request().query('SELECT * FROM [TOURNAMENT];').catch(err => {
+    const result = await pool.request().query('SELECT t.id, t.name, t.cashprize, t.sponsor, MIN(m.startinghour) startinghour FROM [TOURNAMENT] t, [MATCH] m WHERE t.id = m.idtournament GROUP BY t.id, t.name, t.cashprize, t.sponsor;').catch(err => {
         return res.status(400).send('Une erreur est survenue: ' + err);
     });
     
-    return res.status(200).send({
-        tournaments: result.recordset
-    });
+    return res.status(200).send(result.recordset);
 }
 
 module.exports = {
     createTournament: createTournament,
-    getBracketByTournament: getBracketByTournament,
-    getAllTournament: getAllTournament
+    getBracketByTournamentId: getBracketByTournamentId,
+    getAllTournamentForGrid: getAllTournamentForGrid
 };
