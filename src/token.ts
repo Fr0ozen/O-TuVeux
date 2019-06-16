@@ -71,8 +71,43 @@ function checkOrganizerToken(req, res, next) {
     }
 }
 
+function checkRefereeOrOrganizerToken(req, res, next) {
+    let publicKey = fs.readFileSync('./keys/public.key', 'utf8');
+    let token = req.headers['x-access-token'] || req.headers['authorization'];
+
+    if (token) {
+        jwt.verify(token, publicKey, async (err, decoded) => {
+            if (err) {
+                return res.status(401).send('Le token n\'est plus valide');
+            } else {
+                const userId = req.body.user.id;
+                const matchId = req.body.idmatch;
+                
+                const pool = await poolPromise;
+                const resultOrganizer = await pool.request().query('SELECT isorganizer FROM [USER] WHERE id = ' + userId + ';').catch(err => {
+                    return res.status(400).send('Une erreur est survenue: ' + err);
+                });
+                
+
+                const resultReferee = await pool.request().query('SELECT COUNT(*) isReferee FROM [MATCHREFEREE] WHERE idmatch = \'' + matchId + '\' AND idreferee = \'' + userId + '\';').catch(err => {
+                    return res.status(400).send('Une erreur est survenue: ' + err);
+                });
+                
+                if (resultOrganizer.recordset[0].isorganizer === true || resultReferee.recordset[0].isReferee === 1) {
+                    next();
+                } else {
+                    return res.status(401).send('L\'utilisateur courant n\'est pas organisateur ou référent');
+                }
+            }
+        });
+    } else {
+        return res.status(401).send('Aucun token n\'a été trouvé');
+    }
+}
+
 module.exports = {
     createToken: createToken,
     checkUserToken: checkUserToken,
-    checkOrganizerToken: checkOrganizerToken
+    checkOrganizerToken: checkOrganizerToken,
+    checkRefereeOrOrganizerToken: checkRefereeOrOrganizerToken
 };

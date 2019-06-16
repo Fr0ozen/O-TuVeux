@@ -27,7 +27,14 @@ app.use(function (req, res, next) {
     next();
 });
 
+//All - POST
 app.post('/createToken', token.createToken);
+app.post('/getMatchScore', round.getMatchScore);
+app.post('/getBracketByTournamentId', tournament.getBracketByTournamentId);
+app.post('/getMatchById', match.getMatchById);
+app.post('/isReferee', user.isReferee);
+
+//Organizer - POST
 app.post('/createPlayer', token.checkOrganizerToken, player.createPlayer);
 app.post('/getAllPlayer', token.checkOrganizerToken, player.getAllPlayer);
 app.post('/createTeam', token.checkOrganizerToken, team.createTeam);
@@ -35,12 +42,12 @@ app.post('/getAllTeam', token.checkOrganizerToken, team.getAllTeam);
 app.post('/createArena', token.checkOrganizerToken, arena.createArena);
 app.post('/getAllArena', token.checkOrganizerToken, arena.getAllArena);
 app.post('/createTournament', token.checkOrganizerToken, tournament.createTournament);
-app.post('/addRound', token.checkOrganizerToken, round.addRound);
-app.post('/getAllRoundsMatch', round.getAllRoundsMatch);
-app.post('/getLiveMatches', match.getLiveMatches);
 app.post('/getAllUser', token.checkOrganizerToken, user.getAllUser);
-app.post('/getBracketByTournamentId', tournament.getBracketByTournamentId);
 
+//Referee - POST
+app.post('/addRound', token.checkRefereeOrOrganizerToken, round.addRound);
+
+//All - GET
 app.get('/getAllTournamentForGrid', tournament.getAllTournamentForGrid);
 app.get('/getAllMatchStartedForGrid', match.getAllMatchStartedForGrid);
 

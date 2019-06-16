@@ -11,6 +11,19 @@ async function getAllUser(req, res) {
     });
 }
 
+async function isReferee(req, res) {
+    const userId = req.body.user.id;
+    const matchId = req.body.idmatch;
+    
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT COUNT(*) isReferee FROM [MATCHREFEREE] WHERE idmatch = \'' + matchId + '\' AND idreferee = \'' + userId + '\';').catch(err => {
+        return res.status(400).send('Une erreur est survenue: ' + err);
+    });
+    
+    return res.status(200).send(result.recordset);
+}
+
 module.exports = {
-    getAllUser: getAllUser
+    getAllUser: getAllUser,
+    isReferee: isReferee
 };

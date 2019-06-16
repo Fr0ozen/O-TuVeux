@@ -14,64 +14,70 @@ const pusher = new Pusher({
 async function addRound(req, res) {
     const round = req.body.rounds[0];
     const round2 = req.body.rounds[1];
+    const teamScore = req.body.teamScore;
 
-    let idmatch = round.idmatch;
-    let idteam = round.idteam;
+    let idmatch = req.body.idmatch;
+    let idteam = round.team.id;
     let roundnumber = round.roundnumber;
     let startingtime = round.startingtime;
     let endingtime = round.endingtime;
     let isct = round.isct;
     let iswinner = round.iswinner;
 
-    let idmatch2 = round2.idmatch;
-    let idteam2 = round2.idteam;
+    let idteam2 = round2.team.id;
     let roundnumber2 = round2.roundnumber;
     let startingtime2 = round2.startingtime;
     let endingtime2 = round2.endingtime;
     let isct2 = round2.isct;
     let iswinner2 = round2.iswinner;
 
-    if(idmatch && idteam && roundnumber && typeof startingtime !== undefined && endingtime && typeof isct !== undefined && typeof iswinner !== undefined) {
+    if (roundnumber < 32) {
+        if(idmatch && idteam && roundnumber && typeof startingtime !== undefined && endingtime && typeof isct !== undefined && typeof iswinner !== undefined) {
         const pool = await poolPromise;
-        let query = 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch + '\', \'' + idteam + '\', \'' + roundnumber + '\', \'' + startingtime + '\', \'' + endingtime + '\', \'' + isct + '\', \'' + iswinner + '\');';
-        query = query + 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch2 + '\', \'' + idteam2 + '\', \'' + roundnumber2 + '\', \'' + startingtime2 + '\', \'' + endingtime2 + '\', \'' + isct2 + '\', \'' + iswinner2 + '\');';
+            let query = 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch + '\', \'' + idteam + '\', \'' + roundnumber + '\', \'' + startingtime + '\', \'' + endingtime + '\', \'' + isct + '\', \'' + iswinner + '\');';
+            query = query + 'INSERT INTO [ROUND](idmatch, idteam, roundnumber, startingtime, endingtime, isct, iswinner) VALUES (\'' + idmatch + '\', \'' + idteam2 + '\', \'' + roundnumber2 + '\', \'' + startingtime2 + '\', \'' + endingtime2 + '\', \'' + isct2 + '\', \'' + iswinner2 + '\');';
 
-        await pool.request().query(query).catch(err => {
-            return res.status(400).send('Une erreur est survenue: ' + err);
-        });
-        
-        pusher.trigger("events-channel", "new-like", {
-            teamNumber: req.body.teamNumber,
-            rounds: req.body.rounds,
-            teamScore: req.body.teamScore,
-            idwinningteam: req.body.idwinningteam
-        });
-        
-        return res.status(200).send({
-            message: 'Récupartion de l\'équipe gagnante',
-            idwinningteam: req.body.idwinningteam
-        });
+            await pool.request().query(query).catch(err => {
+                return res.status(400).send('Une erreur est survenue: ' + err);
+            });
+
+            pusher.trigger('events-channel', 'updating-score', {
+                teamNumber: req.body.teamNumber,
+                rounds: req.body.rounds,
+                teamScore: req.body.teamScore,
+                idwinningteam: req.body.idwinningteam
+            });
+            
+            if (roundnumber === 31 || teamScore === 16) {
+                await pool.request().query('UPDATE [MATCH] SET isover = 1 WHERE id = \'' + idmatch + '\';').catch(err => {
+                    return res.status(400).send('Une erreur est survenue: ' + err);
+                });
+            }
+
+            return res.status(200).send({
+                message: 'Le score à bien été mis à jour'
+            });
+        } else {
+            return res.status(400).send('Paramètre manquant');
+        }   
     } else {
-        return res.status(400).send('Paramètre manquant');
+        return res.status(400).send('Le match est terminé !');
     }
 }
 
-async function getAllRoundsMatch(req, res){
+async function getMatchScore(req, res) {
     let idmatch = req.body.idmatch;
     const pool = await poolPromise;
-    let query = 'SELECT [MATCH].id, [ROUND].idteam, ISNULL(SUM(IIF(iswinner = 1, 1, 0)), 0) as scoreTeam FROM [MATCH] LEFT JOIN [ROUND] ON [ROUND].idmatch = [MATCH].id WHERE [MATCH].id = \'' + idmatch + '\' GROUP BY [MATCH].id, [ROUND].idteam;'; 
+    let query = 'SELECT t.id, t.name, SUM(CAST(r.iswinner AS INT)) score FROM [MATCH] m, [ROUND] r, [TEAM] t WHERE m.id = r.idmatch AND r.idteam = t.id AND m.id = \'' + idmatch + '\' GROUP BY t.id, t.name ORDER BY t.id, t.name;'; 
     
     const result = await pool.request().query(query).catch(err => {
         return res.status(400).send('Une erreur est survenue: ' + err);
     });
         
-    return res.status(200).send({
-        message: '',
-        teamScore: result.recordsets
-    });
+    return res.status(200).send(result.recordsets);
 }
 
 module.exports = {
     addRound: addRound,
-    getAllRoundsMatch: getAllRoundsMatch
+    getMatchScore: getMatchScore
 };
