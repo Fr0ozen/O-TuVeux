@@ -46,6 +46,10 @@ app.post('/getAllUser', token.checkOrganizerToken, user.getAllUser);
 
 //Referee - POST
 app.post('/addRound', token.checkRefereeOrOrganizerToken, round.addRound);
+app.post('/startMatch', token.checkRefereeOrOrganizerToken, match.startMatch);
+
+//User - POST
+app.post('/getAllMatchRefereeForGrid', token.checkUserToken, match.getAllMatchRefereeForGrid);
 
 //All - GET
 app.get('/getAllTournamentForGrid', tournament.getAllTournamentForGrid);
